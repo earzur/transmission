@@ -1,5 +1,5 @@
 FROM debian:stretch
-MAINTAINER David Personette <dperson@gmail.com>
+MAINTAINER Erwan Arzur <erwan@arzur.net>
 
 # Install transmission
 RUN export DEBIAN_FRONTEND='noninteractive' && \
@@ -9,24 +9,16 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
                 $(apt-get -s dist-upgrade|awk '/^Inst.*ecurity/ {print $2}') &&\
     apt-get clean && \
     dir="/var/lib/transmission-daemon" && \
-    rm $dir/info && \
-    mv $dir/.config/transmission-daemon $dir/info && \
-    rmdir $dir/.config && \
+    rm -rf $dir/info && \
+    rm -rf $dir/.config && \
     usermod -d $dir debian-transmission && \
-    [[ -d $dir/downloads ]] || mkdir -p $dir/downloads && \
-    [[ -d $dir/incomplete ]] || mkdir -p $dir/incomplete && \
-    [[ -d $dir/info/blocklists ]] || mkdir -p $dir/info/blocklists && \
-    file="$dir/info/settings.json" && \
-    sed -i 's|\("download-dir":\) .*|\1 "'"$dir"'/downloads",|' $file && \
-    sed -i '/"blocklist-enabled"/a\    "dht-enabled": true,' $file && \
-    sed -i '/"download-dir"/a\    "incomplete-dir": "'"$dir"'/incomplete",' \
-                $file && \
-    sed -i '/"incomplete-dir"/a\    "incomplete-dir-enabled": true,' $file && \
-    sed -i '/"peer-port"/a\    "peer-socket-tos": "lowcost",' $file && \
-    sed -i '/"port-forwarding-enabled"/a\    "queue-stalled-enabled": true,' \
-                $file && \
-    sed -i '/"queue-stalled-enabled"/a\    "ratio-limit-enabled": true,' \
-                $file && \
+    test -d $dir/info || mkdir -p $dir/info && \
+    test -d $dir/downloads || mkdir -p $dir/downloads && \
+    test -d $dir/incomplete  || mkdir -p $dir/incomplete && \
+    test -d $dir/info/blocklists || mkdir -p $dir/info/blocklists && \
+    test -d $dir/watch  || mkdir -p $dir/watch
+COPY settings.json /var/lib/transmission-daemon/info
+RUN dir="/var/lib/transmission-daemon" && \
     chown -Rh debian-transmission. $dir && \
     rm -rf /var/lib/apt/lists/* /tmp/*
 COPY transmission.sh /usr/bin/

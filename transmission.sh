@@ -71,7 +71,7 @@ shift $(( OPTIND - 1 ))
 for env in $(printenv | grep '^TR_'); do
     name=$(cut -c4- <<< ${env%%=*} | tr '_A-Z' '-a-z')
     val="\"${env##*=}\""
-    [[ "$val" =~ ^\"([0-9]+|false|true)\"$ ]] && val=$(sed 's|"||g' <<<$val)
+    test "$val" =~ ^\"([0-9]+|false|true)\"$ && val=$(sed 's|"||g' <<<$val)
     sed -i 's|\([0-9A-Za-z"]\)$|\1,|' $dir/info/settings.json
     if grep -q "\"$name\"" $dir/info/settings.json; then
         sed -i "/\"$name\"/s|:.*|: $val,|" $dir/info/settings.json
@@ -82,11 +82,11 @@ for env in $(printenv | grep '^TR_'); do
 done
 
 watchdir=$(awk -F'=' '/"watch-dir"/ {print $2}' $dir/info/settings.json |
-            sed 's/[,"]//g')
-[[ -d $dir/downloads ]] || mkdir -p $dir/downloads
-[[ -d $dir/incomplete ]] || mkdir -p $dir/incomplete
-[[ -d $dir/info/blocklists ]] || mkdir -p $dir/info/blocklists
-[[ $watchdir && ! -d $watchdir ]] && mkdir -p $watchdir
+           sed 's/[,"]//g')
+test -d $dir/downloads  || mkdir -p $dir/downloads
+test -d $dir/incomplete  || mkdir -p $dir/incomplete
+test -d $dir/info/blocklists ]] || mkdir -p $dir/info/blocklists
+test -n $watchdir && test ! -d $watchdir  && mkdir -p $watchdir
 
 chown -Rh debian-transmission. /etc/transmission-daemon/settings.json $dir 2>&1|
             grep -iv 'Read-only' || :
