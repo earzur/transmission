@@ -85,7 +85,7 @@ watchdir=$(awk -F'=' '/"watch-dir"/ {print $2}' $dir/info/settings.json |
            sed 's/[,"]//g')
 test -d $dir/downloads  || mkdir -p $dir/downloads
 test -d $dir/incomplete  || mkdir -p $dir/incomplete
-test -d $dir/info/blocklists ]] || mkdir -p $dir/info/blocklists
+test -d $dir/info/blocklists || mkdir -p $dir/info/blocklists
 test -n $watchdir && test ! -d $watchdir  && mkdir -p $watchdir
 
 chown -Rh debian-transmission. /etc/transmission-daemon/settings.json $dir 2>&1|
